@@ -85,16 +85,14 @@ def mark_centerlines(pairs, image):
 feed = cv2.VideoCapture(0)
 
 while True:
-    ret, image = feed.read()
-
+    r, image = feed.read()
+    
     edges = merge_edges(find_edges(image))                  # finds edges
     mark_edges(edges, image)                                # marks edges on image
     mark_centerlines(find_parallel_pairs(edges), image)     # marks centerlines on image
-
-    # Display the result
-    cv2.imshow('Overlay', image)                    # display the overlay
-
-    # Press 'q' to quit
+    
+    cv2.imshow('Overlay', image)                            # display the overlay
+    
     if cv2.waitKey(0):
         break
 

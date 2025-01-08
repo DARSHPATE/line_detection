@@ -39,10 +39,12 @@ def find_edges(image, rho = 1, theta = np.pi / 180, threshold = 120):
 # determine pairs of edges that should be considered parallel
 
 def find_parallel_pairs(edges, angle_threshold = np.pi / 4, _pairs = None):
+    if edges is None:
+        return []
+    if len(edges) > 900:
+        return []
     if _pairs is None:
         _pairs = []
-    if edges is None:
-        return ()
     edges = edges + []
     for i, edge1 in enumerate(edges):
         for j, edge2 in enumerate(edges[i + 1:]):
@@ -71,14 +73,24 @@ def mark_edges(edges, image):
 def mark_centerlines(pairs, image):
     for pair in pairs:
         midpoints = [0, 0]
-        for j, y in enumerate([0, 100]):
-            points = [0, 0]
-            for i in range(2):
-                edge = pair[i]
-                r, theta = edge
-                t = (y - r * np.sin(theta)) / (np.cos(theta))
-                points[i] = r * np.cos(theta) - t * np.sin(theta)
-            midpoints[j] = ((points[0] + points[1]) / 2, y)
+        points = [0, 0]
+        theta = (pair[0][1] + pair[1][1]) / 2
+        if np.abs(theta - np.pi / 2) < np.pi / 4 and np.abs(pair[0][1] - pair[1][1]) < 1:
+            for j, x in enumerate([0, 100]):
+                for i in range(2):
+                    edge = pair[i]
+                    r, theta = edge
+                    t = (r * np.cos(theta) - x) / (np.sin(theta))
+                    points[i] = r * np.sin(theta) + t * np.cos(theta)
+                midpoints[j] = (x, (points[0] + points[1]) / 2)
+        else:
+            for j, y in enumerate([0, 100]):
+                for i in range(2):
+                    edge = pair[i]
+                    r, theta = edge
+                    t = (y - r * np.sin(theta)) / (np.cos(theta))
+                    points[i] = r * np.cos(theta) - t * np.sin(theta)
+                midpoints[j] = ((points[0] + points[1]) / 2, y)
         x1, y1 = (int(101 * midpoints[0][0] - 100 * midpoints[1][0]), int(101 * midpoints[0][1] - 100 * midpoints[1][1]))
         x2, y2 = (int(-100 * midpoints[0][0] + 101 * midpoints[1][0]), int(-100 * midpoints[0][1] + 101 * midpoints[1][1]))
         try:
@@ -93,8 +105,8 @@ cap = cv2.VideoCapture(0)
 while True:
     ret, frame = cap.read()
 
-    x_margin = 200
-    y_margin = 150
+    x_margin = 400
+    y_margin = 200
     x1_roi = x_margin
     y1_roi = y_margin
     x2_roi = frame.shape[1] - x_margin

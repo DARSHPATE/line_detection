@@ -1,5 +1,9 @@
+# Darsh Patel - circle video overlay
+
 import cv2
 import numpy as np
+
+# Applies image preprocessing and then the Hough Circle Transform to detect the circle of the can
 
 def find_circles(image, k=11, tlower=50, tupper=150, param1=30, param2=50):
     gaussian = cv2.GaussianBlur(image, (k, k), 0)
@@ -10,11 +14,15 @@ def find_circles(image, k=11, tlower=50, tupper=150, param1=30, param2=50):
     else:
         return [[int(n) for n in circle[0]] for circle in circles]
 
+# Marks the circle and its center on the image
+
 def mark_circle(circles, image):
     if circles is not None:
         for circle in circles:
             cv2.circle(image, (circle[0], circle[1]), circle[2], (255, 0, 0), 2)
             cv2.circle(image, (circle[0], circle[1]), 0, (0, 0, 255), 5)
+
+# Separates the video into individual frames
 
 def separate_frames(video_capture):
     frames = []
@@ -26,12 +34,16 @@ def separate_frames(video_capture):
     video_capture.release()
     return frames
 
+# Displays the frames to make the video overlay after frames have been processed
+
 def display_frames(frames):
     for frame in frames:
         frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
         cv2.imshow('Circle overlay', frame)
         if cv2.waitKey(25) & 0xFF == 27:
             break
+
+# Separates frames, performs image processing on each frame, and then displays the result
 
 cap = cv2.VideoCapture('IMG_2043.MOV')
 frames = separate_frames(cap)

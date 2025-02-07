@@ -107,7 +107,8 @@ def find_midline(contours, n=1000, d=4):
         return []
     c1 = separate_by_arc_length(contours[0], n, d)
     c2 = separate_by_arc_length(contours[1], n, d)
-    if (c1[0][0] - c1[-1][0]) * (c2[0][0] - c2[-1][0]) < 0:
+    c1begin, c1end, c2begin, c2end = tuple(map(np.array, [c1[0], c1[-1], c2[0], c2[-1]]))
+    if np.linalg.norm((c1end - c1begin) - (c2end - c2begin)) > np.linalg.norm((c1end - c1begin) + (c2end - c2begin)):
         c1.reverse()
     return [0.5 * (c1[i] + c2[i]) for i in range(n + 1)]
 
